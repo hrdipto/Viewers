@@ -52,7 +52,6 @@ import { getActiveContexts } from './store/layout/selectors.js';
 import store from './store';
 
 /** Contexts */
-import WhiteLabelingContext from './context/WhiteLabelingContext';
 import UserManagerContext from './context/UserManagerContext';
 import { AppProvider, useAppContext, CONTEXTS } from './context/AppContext';
 
@@ -175,20 +174,18 @@ class App extends Component {
                 <OidcProvider store={store} userManager={this._userManager}>
                   <UserManagerContext.Provider value={this._userManager}>
                     <Router basename={routerBasename}>
-                      <WhiteLabelingContext.Provider value={whiteLabeling}>
-                        <SnackbarProvider service={UINotificationService}>
-                          <DialogProvider service={UIDialogService}>
-                            <ModalProvider
-                              modal={OHIFModal}
-                              service={UIModalService}
-                            >
-                              <OHIFStandaloneViewer
-                                userManager={this._userManager}
-                              />
-                            </ModalProvider>
-                          </DialogProvider>
-                        </SnackbarProvider>
-                      </WhiteLabelingContext.Provider>
+                      <SnackbarProvider service={UINotificationService}>
+                        <DialogProvider service={UIDialogService}>
+                          <ModalProvider
+                            modal={OHIFModal}
+                            service={UIModalService}
+                          >
+                            <OHIFStandaloneViewer
+                              userManager={this._userManager}
+                            />
+                          </ModalProvider>
+                        </DialogProvider>
+                      </SnackbarProvider>
                     </Router>
                   </UserManagerContext.Provider>
                 </OidcProvider>
@@ -205,15 +202,13 @@ class App extends Component {
           <AppProvider config={this._appConfig}>
             <I18nextProvider i18n={i18n}>
               <Router basename={routerBasename}>
-                <WhiteLabelingContext.Provider value={whiteLabeling}>
-                  <SnackbarProvider service={UINotificationService}>
-                    <DialogProvider service={UIDialogService}>
-                      <ModalProvider modal={OHIFModal} service={UIModalService}>
-                        <OHIFStandaloneViewer />
-                      </ModalProvider>
-                    </DialogProvider>
-                  </SnackbarProvider>
-                </WhiteLabelingContext.Provider>
+                <SnackbarProvider service={UINotificationService}>
+                  <DialogProvider service={UIDialogService}>
+                    <ModalProvider modal={OHIFModal} service={UIModalService}>
+                      <OHIFStandaloneViewer />
+                    </ModalProvider>
+                  </DialogProvider>
+                </SnackbarProvider>
               </Router>
             </I18nextProvider>
           </AppProvider>

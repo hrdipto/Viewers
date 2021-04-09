@@ -1,15 +1,35 @@
 import { connect } from 'react-redux';
-import ViewerRetrieveStudyData from './ViewerRetrieveStudyData.js';
 import OHIF from '@ohif/core';
+import ViewerRetrieveStudyData from './ViewerRetrieveStudyData.js';
 
 const { clearViewportSpecificData, setStudyData } = OHIF.redux.actions;
 const isActive = a => a.active === true;
 
 const mapStateToProps = (state, ownProps) => {
-  const activeServer = state.servers.servers.find(isActive);
-
   return {
-    server: ownProps.server || activeServer,
+    server: {
+      name: 'DCM4CHEE',
+      wadoUriRoot: 'https://34.121.99.7:8443/dcm4chee-arc/aets/DCM4CHEE/wado',
+      qidoRoot: 'https://34.121.99.7:8443/dcm4chee-arc/aets/DCM4CHEE/rs',
+      wadoRoot: 'https://34.121.99.7:8443/dcm4chee-arc/aets/DCM4CHEE/rs',
+      qidoSupportsIncludeField: true,
+      imageRendering: 'wadors',
+      thumbnailRendering: 'wadors',
+      enableStudyLazyLoad: true,
+      supportsFuzzyMatching: true,
+    },
+
+    // server: {
+    // 	name: 'DCM4CHEE',
+    // 	wadoUriRoot: 'https://server.dcmjs.org/dcm4chee-arc/aets/DCM4CHEE/wado',
+    // 	qidoRoot: 'https://server.dcmjs.org/dcm4chee-arc/aets/DCM4CHEE/rs',
+    // 	wadoRoot: 'https://server.dcmjs.org/dcm4chee-arc/aets/DCM4CHEE/rs',
+    // 	qidoSupportsIncludeField: true,
+    // 	imageRendering: 'wadors',
+    // 	thumbnailRendering: 'wadors',
+    // 	enableStudyLazyLoad: true,
+    // 	supportsFuzzyMatching: true
+    // }
   };
 };
 const mapDispatchToProps = dispatch => {

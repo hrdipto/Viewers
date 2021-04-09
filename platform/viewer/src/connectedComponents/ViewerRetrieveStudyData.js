@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { metadata, studies, utils, log } from '@ohif/core';
-import usePrevious from '../customHooks/usePrevious';
 
 import ConnectedViewer from './ConnectedViewer.js';
 import PropTypes from 'prop-types';
 import { extensionManager } from './../App.js';
-import { useSnackbarContext } from '@ohif/ui';
 
 // Contexts
 import AppContext from '../context/AppContext';
@@ -215,7 +213,7 @@ function ViewerRetrieveStudyData({
   const [error, setError] = useState(false);
   const [studies, setStudies] = useState([]);
   const [isStudyLoaded, setIsStudyLoaded] = useState(false);
-  const snackbarContext = useSnackbarContext();
+  //const snackbarContext = useSnackbarContext();
   const { appConfig = {} } = useContext(AppContext);
   const {
     filterQueryParam: isFilterStrategy = false,
@@ -253,8 +251,8 @@ function ViewerRetrieveStudyData({
     // Show message in case not promoted neither filtered but should to
     _showUserMessage(
       isQueryParamApplied,
-      'Query parameters were not totally applied. It might be using original series list for given study.',
-      snackbarContext
+      'Query parameters were not totally applied. It might be using original series list for given study.'
+      //snackbarContext
     );
 
     setStudies([...studies, study]);
@@ -330,11 +328,11 @@ function ViewerRetrieveStudyData({
     try {
       const filters = {};
       // Use the first, discard others
-      const seriesInstanceUID = seriesInstanceUIDs && seriesInstanceUIDs[0];
+      const seriesInstanceUID = null;
       const retrieveParams = [server, studyInstanceUIDs];
 
       if (seriesInstanceUID) {
-        filters.seriesInstanceUID = seriesInstanceUID;
+        filters.seriesInstanceUID = null;
         // Query param filtering controlled by appConfig property
         if (isFilterStrategy) {
           retrieveParams.push(filters);
@@ -386,19 +384,19 @@ function ViewerRetrieveStudyData({
     }
   });
 
-  const prevStudyInstanceUIDs = usePrevious(studyInstanceUIDs);
+  // const prevStudyInstanceUIDs = usePrevious(studyInstanceUIDs);
 
-  useEffect(() => {
-    const hasStudyInstanceUIDsChanged = !(
-      prevStudyInstanceUIDs &&
-      prevStudyInstanceUIDs.every(e => studyInstanceUIDs.includes(e))
-    );
+  // useEffect(() => {
+  //   const hasStudyInstanceUIDsChanged = !(
+  //     prevStudyInstanceUIDs &&
+  //     prevStudyInstanceUIDs.every((e) => studyInstanceUIDs.includes(e))
+  //   );
 
-    if (hasStudyInstanceUIDsChanged) {
-      studyMetadataManager.purge();
-      purgeCancellablePromises();
-    }
-  }, [prevStudyInstanceUIDs, purgeCancellablePromises, studyInstanceUIDs]);
+  //   if (hasStudyInstanceUIDsChanged) {
+  //     studyMetadataManager.purge();
+  //     purgeCancellablePromises();
+  //   }
+  // }, [prevStudyInstanceUIDs, purgeCancellablePromises, studyInstanceUIDs]);
 
   useEffect(() => {
     cancelableSeriesPromises = {};

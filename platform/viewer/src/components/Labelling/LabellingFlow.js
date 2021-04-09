@@ -5,7 +5,6 @@ import cloneDeep from 'lodash.clonedeep';
 
 import LabellingTransition from './LabellingTransition.js';
 import OHIFLabellingData from './OHIFLabellingData.js';
-import EditDescriptionDialog from './../EditDescriptionDialog/EditDescriptionDialog.js';
 import './LabellingFlow.css';
 
 const LabellingFlow = ({
@@ -213,15 +212,15 @@ const LabellingFlow = ({
     }
   };
 
-  if (editDescriptionOnDialog) {
-    return (
-      <EditDescriptionDialog
-        onCancel={labellingDoneCallback}
-        onUpdate={descriptionDialogUpdate}
-        measurementData={state.measurementData}
-      />
-    );
-  }
+  // if (editDescriptionOnDialog) {
+  //   return (
+  //     <EditDescriptionDialog
+  //       onCancel={labellingDoneCallback}
+  //       onUpdate={descriptionDialogUpdate}
+  //       measurementData={state.measurementData}
+  //     />
+  //   );
+  // }
 
   return (
     <LabellingTransition
