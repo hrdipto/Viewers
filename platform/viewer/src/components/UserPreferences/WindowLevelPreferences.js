@@ -6,9 +6,9 @@ import { redux } from '@ohif/core';
 import { TabFooter, useSnackbarContext } from '@ohif/ui';
 import { useTranslation } from 'react-i18next';
 
-const { actions } = redux;
-
 import './WindowLevelPreferences.styl';
+
+const { actions } = redux;
 
 function WindowLevelPreferences({ onClose }) {
   const dispatch = useDispatch();

@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { useLogger } from '@ohif/ui';
 
 import OHIF, { MODULE_TYPES, DICOMSR } from '@ohif/core';
 import { withDialog } from '@ohif/ui';
+// import { withDialog } from './../custom/DialogProvider';
 import moment from 'moment';
-import ConnectedHeader from './ConnectedHeader.js';
 import ToolbarRow from './ToolbarRow.js';
 import ConnectedStudyBrowser from './ConnectedStudyBrowser.js';
 import ConnectedViewerMain from './ConnectedViewerMain.js';
@@ -17,7 +16,7 @@ import { ReconstructionIssues } from './../../../core/src/enums.js';
 import dcmjs from 'dcmjs';
 
 // Contexts
-import WhiteLabelingContext from '../context/WhiteLabelingContext.js';
+
 import UserManagerContext from '../context/UserManagerContext';
 import AppContext from '../context/AppContext';
 
@@ -240,78 +239,45 @@ class Viewer extends Component {
 
     return (
       <>
-        {/* HEADER */}
-        <WhiteLabelingContext.Consumer>
-          {whiteLabeling => (
-            <UserManagerContext.Consumer>
-              {userManager => (
-                <AppContext.Consumer>
-                  {appContext => (
-                    <ConnectedHeader
-                      linkText={
-                        appContext.appConfig.showStudyList
-                          ? 'Study List'
-                          : undefined
-                      }
-                      linkPath={
-                        appContext.appConfig.showStudyList ? '/' : undefined
-                      }
-                      userManager={userManager}
-                    >
-                      {whiteLabeling &&
-                        whiteLabeling.createLogoComponentFn &&
-                        whiteLabeling.createLogoComponentFn(React)}
-                    </ConnectedHeader>
-                  )}
-                </AppContext.Consumer>
-              )}
-            </UserManagerContext.Consumer>
-          )}
-        </WhiteLabelingContext.Consumer>
-
         {/* TOOLBAR */}
-        <ErrorBoundaryDialog context="ToolbarRow">
-          <ToolbarRow
-            activeViewport={
-              this.props.viewports[this.props.activeViewportIndex]
+        <ToolbarRow
+          activeViewport={this.props.viewports[this.props.activeViewportIndex]}
+          isDerivedDisplaySetsLoaded={this.props.isDerivedDisplaySetsLoaded}
+          isLeftSidePanelOpen={this.state.isLeftSidePanelOpen}
+          isRightSidePanelOpen={this.state.isRightSidePanelOpen}
+          selectedLeftSidePanel={
+            this.state.isLeftSidePanelOpen
+              ? this.state.selectedLeftSidePanel
+              : ''
+          }
+          selectedRightSidePanel={
+            this.state.isRightSidePanelOpen
+              ? this.state.selectedRightSidePanel
+              : ''
+          }
+          handleSidePanelChange={(side, selectedPanel) => {
+            const sideClicked = side && side[0].toUpperCase() + side.slice(1);
+            const openKey = `is${sideClicked}SidePanelOpen`;
+            const selectedKey = `selected${sideClicked}SidePanel`;
+            const updatedState = Object.assign({}, this.state);
+
+            const isOpen = updatedState[openKey];
+            const prevSelectedPanel = updatedState[selectedKey];
+            // RoundedButtonGroup returns `null` if selected button is clicked
+            const isSameSelectedPanel =
+              prevSelectedPanel === selectedPanel || selectedPanel === null;
+
+            updatedState[selectedKey] = selectedPanel || prevSelectedPanel;
+
+            const isClosedOrShouldClose = !isOpen || isSameSelectedPanel;
+            if (isClosedOrShouldClose) {
+              updatedState[openKey] = !updatedState[openKey];
             }
-            isDerivedDisplaySetsLoaded={this.props.isDerivedDisplaySetsLoaded}
-            isLeftSidePanelOpen={this.state.isLeftSidePanelOpen}
-            isRightSidePanelOpen={this.state.isRightSidePanelOpen}
-            selectedLeftSidePanel={
-              this.state.isLeftSidePanelOpen
-                ? this.state.selectedLeftSidePanel
-                : ''
-            }
-            selectedRightSidePanel={
-              this.state.isRightSidePanelOpen
-                ? this.state.selectedRightSidePanel
-                : ''
-            }
-            handleSidePanelChange={(side, selectedPanel) => {
-              const sideClicked = side && side[0].toUpperCase() + side.slice(1);
-              const openKey = `is${sideClicked}SidePanelOpen`;
-              const selectedKey = `selected${sideClicked}SidePanel`;
-              const updatedState = Object.assign({}, this.state);
 
-              const isOpen = updatedState[openKey];
-              const prevSelectedPanel = updatedState[selectedKey];
-              // RoundedButtonGroup returns `null` if selected button is clicked
-              const isSameSelectedPanel =
-                prevSelectedPanel === selectedPanel || selectedPanel === null;
-
-              updatedState[selectedKey] = selectedPanel || prevSelectedPanel;
-
-              const isClosedOrShouldClose = !isOpen || isSameSelectedPanel;
-              if (isClosedOrShouldClose) {
-                updatedState[openKey] = !updatedState[openKey];
-              }
-
-              this.setState(updatedState);
-            }}
-            studies={this.props.studies}
-          />
-        </ErrorBoundaryDialog>
+            this.setState(updatedState);
+          }}
+          studies={this.props.studies}
+        />
 
         {/*<ConnectedStudyLoadingMonitor studies={this.props.studies} />*/}
         {/*<StudyPrefetcher studies={this.props.studies} />*/}
@@ -319,31 +285,27 @@ class Viewer extends Component {
         {/* VIEWPORTS + SIDEPANELS */}
         <div className="FlexboxLayout">
           {/* LEFT */}
-          <ErrorBoundaryDialog context="LeftSidePanel">
-            <SidePanel from="left" isOpen={this.state.isLeftSidePanelOpen}>
-              {VisiblePanelLeft ? (
-                <VisiblePanelLeft
-                  viewports={this.props.viewports}
-                  studies={this.props.studies}
-                  activeIndex={this.props.activeViewportIndex}
-                />
-              ) : (
-                <ConnectedStudyBrowser
-                  studies={this.state.thumbnails}
-                  studyMetadata={this.props.studies}
-                />
-              )}
-            </SidePanel>
-          </ErrorBoundaryDialog>
+          <SidePanel from="left" isOpen={this.state.isLeftSidePanelOpen}>
+            {VisiblePanelLeft ? (
+              <VisiblePanelLeft
+                viewports={this.props.viewports}
+                studies={this.props.studies}
+                activeIndex={this.props.activeViewportIndex}
+              />
+            ) : (
+              <ConnectedStudyBrowser
+                studies={this.state.thumbnails}
+                studyMetadata={this.props.studies}
+              />
+            )}
+          </SidePanel>
 
           {/* MAIN */}
           <div className={classNames('main-content')}>
-            <ErrorBoundaryDialog context="ViewerMain">
-              <ConnectedViewerMain
-                studies={this.props.studies}
-                isStudyLoaded={this.props.isStudyLoaded}
-              />
-            </ErrorBoundaryDialog>
+            <ConnectedViewerMain
+              studies={this.props.studies}
+              isStudyLoaded={this.props.isStudyLoaded}
+            />
           </div>
 
           {/* RIGHT */}
@@ -370,6 +332,7 @@ class Viewer extends Component {
 }
 
 export default withDialog(Viewer);
+// export default Viewer;
 
 /**
  * Async function to check if there are any inconsistences in the series.
@@ -390,7 +353,10 @@ export default withDialog(Viewer);
  * @param {*object} displaySet
  * @returns {[string]} an array of strings containing the warnings
  */
-const _checkForSeriesInconsistencesWarnings = async function (displaySet, studies) {
+const _checkForSeriesInconsistencesWarnings = async function(
+  displaySet,
+  studies
+) {
   const warningsList = [];
 
   if (displaySet.Modality !== 'SEG') {
@@ -401,16 +367,22 @@ const _checkForSeriesInconsistencesWarnings = async function (displaySet, studie
             warningsList.push('The dataset is 4D.');
             break;
           case ReconstructionIssues.VARYING_IMAGESDIMENSIONS:
-            warningsList.push('The dataset frames have different dimensions (rows, columns).');
+            warningsList.push(
+              'The dataset frames have different dimensions (rows, columns).'
+            );
             break;
           case ReconstructionIssues.VARYING_IMAGESCOMPONENTS:
-            warningsList.push('The dataset frames have different components (Sample per pixel).');
+            warningsList.push(
+              'The dataset frames have different components (Sample per pixel).'
+            );
             break;
           case ReconstructionIssues.VARYING_IMAGESORIENTATION:
             warningsList.push('The dataset frames have different orientation.');
             break;
           case ReconstructionIssues.IRREGULAR_SPACING:
-            warningsList.push('The dataset frames have different pixel spacing.');
+            warningsList.push(
+              'The dataset frames have different pixel spacing.'
+            );
             break;
           case ReconstructionIssues.MULTIFFRAMES:
             warningsList.push('The dataset is a multiframes.');
@@ -419,13 +391,22 @@ const _checkForSeriesInconsistencesWarnings = async function (displaySet, studie
             break;
         }
       });
-      warningsList.push('The datasets is not a reconstructable 3D volume. MPR mode is not available.');
+      warningsList.push(
+        'The datasets is not a reconstructable 3D volume. MPR mode is not available.'
+      );
     }
 
-    if (displaySet.missingFrames &&
+    if (
+      displaySet.missingFrames &&
       (!displaySet.warningIssues ||
-        (displaySet.warningIssues && !displaySet.warningIssues.find(warn => warn === ReconstructionIssues.DATASET_4D)))) {
-      warningsList.push('The datasets is missing frames: ' + displaySet.missingFrames + '.');
+        (displaySet.warningIssues &&
+          !displaySet.warningIssues.find(
+            warn => warn === ReconstructionIssues.DATASET_4D
+          )))
+    ) {
+      warningsList.push(
+        'The datasets is missing frames: ' + displaySet.missingFrames + '.'
+      );
     }
   } else {
     const segMetadata = displaySet.metadata;
@@ -433,22 +414,29 @@ const _checkForSeriesInconsistencesWarnings = async function (displaySet, studie
       return warningsList;
     }
 
-    const { referencedDisplaySet } = displaySet.getSourceDisplaySet(studies, false);
+    const { referencedDisplaySet } = displaySet.getSourceDisplaySet(
+      studies,
+      false
+    );
     if (!referencedDisplaySet) {
       return warningsList;
     }
 
-    const imageIds = referencedDisplaySet.images.map(image => image.getImageId());
+    const imageIds = referencedDisplaySet.images.map(image =>
+      image.getImageId()
+    );
     if (!imageIds || imageIds.length === 0) {
       return warningsList;
     }
 
     for (
-      let i = 0, groupsLen = segMetadata.PerFrameFunctionalGroupsSequence.length;
+      let i = 0,
+        groupsLen = segMetadata.PerFrameFunctionalGroupsSequence.length;
       i < groupsLen;
       ++i
     ) {
-      const PerFrameFunctionalGroups = segMetadata.PerFrameFunctionalGroupsSequence[i];
+      const PerFrameFunctionalGroups =
+        segMetadata.PerFrameFunctionalGroupsSequence[i];
       if (!PerFrameFunctionalGroups) {
         continue;
       }
@@ -458,29 +446,27 @@ const _checkForSeriesInconsistencesWarnings = async function (displaySet, studie
         SourceImageSequence = segMetadata.SourceImageSequence[i];
       } else if (PerFrameFunctionalGroups.DerivationImageSequence) {
         SourceImageSequence =
-          PerFrameFunctionalGroups.DerivationImageSequence
-            .SourceImageSequence;
+          PerFrameFunctionalGroups.DerivationImageSequence.SourceImageSequence;
       }
       if (!SourceImageSequence) {
         if (warningsList.length === 0) {
-          const warningMessage = 'The segmentation ' +
+          const warningMessage =
+            'The segmentation ' +
             'has frames out of plane respect to the source images.';
           warningsList.push(warningMessage);
         }
         continue;
       }
 
-      const {
-        ReferencedSOPInstanceUID,
-      } = SourceImageSequence;
+      const { ReferencedSOPInstanceUID } = SourceImageSequence;
 
       const imageId = imageIds.find(imageId => {
         const sopCommonModule = cornerstone.metaData.get(
-            "sopCommonModule",
-            imageId
+          'sopCommonModule',
+          imageId
         );
         if (!sopCommonModule) {
-            return;
+          return;
         }
 
         return sopCommonModule.sopInstanceUID === ReferencedSOPInstanceUID;
@@ -490,15 +476,13 @@ const _checkForSeriesInconsistencesWarnings = async function (displaySet, studie
         continue;
       }
 
-      const sourceImageMetadata = cornerstone.metaData.get(
-        "instance",
-        imageId
-      );
+      const sourceImageMetadata = cornerstone.metaData.get('instance', imageId);
       if (
         segMetadata.Rows !== sourceImageMetadata.Rows ||
         segMetadata.Columns !== sourceImageMetadata.Columns
       ) {
-        const warningMessage = 'The segmentation ' +
+        const warningMessage =
+          'The segmentation ' +
           'has frames with different geometry ' +
           'dimensions (Rows and Columns) respect to the source images.';
         warningsList.push(warningMessage);
@@ -507,14 +491,15 @@ const _checkForSeriesInconsistencesWarnings = async function (displaySet, studie
     }
 
     if (warningsList.length !== 0) {
-      const warningMessage = 'The segmentation format is not supported yet. ' +
+      const warningMessage =
+        'The segmentation format is not supported yet. ' +
         'The segmentation data (segments) could not be loaded.';
       warningsList.push(warningMessage);
     }
   }
 
   return warningsList;
-}
+};
 
 /**
  * What types are these? Why do we have "mapping" dropped in here instead of in
@@ -555,7 +540,10 @@ const _mapStudiesToThumbnails = function(studies) {
         altImageText = displaySet.Modality ? displaySet.Modality : 'UN';
       }
 
-      const hasWarnings = _checkForSeriesInconsistencesWarnings(displaySet, studies);
+      const hasWarnings = _checkForSeriesInconsistencesWarnings(
+        displaySet,
+        studies
+      );
 
       return {
         imageId,

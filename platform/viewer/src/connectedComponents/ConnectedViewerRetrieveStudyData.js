@@ -1,15 +1,23 @@
 import { connect } from 'react-redux';
-import ViewerRetrieveStudyData from './ViewerRetrieveStudyData.js';
 import OHIF from '@ohif/core';
+import ViewerRetrieveStudyData from './ViewerRetrieveStudyData.js';
 
 const { clearViewportSpecificData, setStudyData } = OHIF.redux.actions;
 const isActive = a => a.active === true;
 
 const mapStateToProps = (state, ownProps) => {
-  const activeServer = state.servers.servers.find(isActive);
-
   return {
-    server: ownProps.server || activeServer,
+    server: {
+      name: 'DCM4CHEE',
+      wadoUriRoot: 'https://dev.radassist.net/dcm4chee-arc/aets/DCM4CHEE/wado',
+      qidoRoot: 'https://dev.radassist.net/dcm4chee-arc/aets/DCM4CHEE/rs',
+      wadoRoot: 'https://dev.radassist.net/dcm4chee-arc/aets/DCM4CHEE/rs',
+      qidoSupportsIncludeField: true,
+      imageRendering: 'wadors',
+      thumbnailRendering: 'wadors',
+      enableStudyLazyLoad: true,
+      supportsFuzzyMatching: true,
+    },
   };
 };
 const mapDispatchToProps = dispatch => {

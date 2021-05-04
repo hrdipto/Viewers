@@ -3,7 +3,7 @@
 const path = require('path');
 const merge = require('webpack-merge');
 const webpack = require('webpack');
-const webpackBase = require('./../../../.webpack/webpack.base.js');
+const webpackBase = require('./.webpack.base/webpack.base.js');
 // ~~ Plugins
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin;

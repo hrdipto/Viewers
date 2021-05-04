@@ -33,6 +33,7 @@ const DialogProvider = ({ children, service }) => {
     );
   }, [dialogs]);
 
+  console.log('NaXXXX');
   const getCenterPosition = id => {
     const root = document.querySelector('#root');
     const centerX = root.offsetLeft + root.offsetWidth / 2;

@@ -31,9 +31,9 @@ const ViewportGrid = function(props) {
   const colSize = 100 / numColumns;
 
   // http://grid.malven.co/
-  if (!viewportData || !viewportData.length) {
-    return null;
-  }
+  // if (!viewportData || !viewportData.length) {
+  //   return null;
+  // }
 
   const snackbar = useSnackbarContext();
   const logger = useLogger();
@@ -44,7 +44,7 @@ const ViewportGrid = function(props) {
         loadAndCacheDerivedDisplaySets(displaySet, studies, logger, snackbar);
       });
     }
-  }, [studies, viewportData, isStudyLoaded, snackbar]);
+  }, [studies, viewportData, isStudyLoaded, snackbar, logger]);
 
   const getViewportPanes = () =>
     layout.viewports.map((layout, viewportIndex) => {

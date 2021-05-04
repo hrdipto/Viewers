@@ -4,10 +4,10 @@ import { withRouter } from 'react-router-dom';
 import ConnectedStudyList from './ConnectedStudyList';
 import useServer from '../customHooks/useServer';
 import OHIF from '@ohif/core';
-const { urlUtil: UrlUtil } = OHIF.utils;
 
 // Contexts
 import AppContext from '../context/AppContext';
+const { urlUtil: UrlUtil } = OHIF.utils;
 
 function StudyListRouting({ match: routeMatch, location: routeLocation }) {
   const {
